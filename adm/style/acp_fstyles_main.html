@@ -1,0 +1,54 @@
+<!-- INCLUDE overall_header.html -->
+
+<a id="maincontent"></a>
+
+<h1>{L_LAXSLASH_FORCESTYLES_ACP_PANEL_HEADER}</h1>
+
+<p>{L_LAXSLASH_FORCESTYLES_ACP_PANEL_DESC}</p>
+
+<!-- IF S_ERROR_BOX_NEEDED -->
+	<div class="errorbox">
+		<h3>{L_WARNING}</h3>
+		<p>
+			<!-- IF S_LAXSLASH_FORCESTYLES_WARN_OVERRIDE_STYLES_ENABLED -->
+				{L_LAXSLASH_FORCESTYLES_WARN_ABOUT_OVERRIDE_STYLES_ON}<!-- IF S_ERRORS --><br /><!-- ENDIF -->
+			<!-- ENDIF -->
+			<!-- IF S_ERRORS -->
+				{ERRORS_OUTPUT}
+			<!-- ENDIF -->
+		</p>
+	</div>
+<!-- ENDIF -->
+
+<form id="acp_laxslash_forcestyles_force_style" method="post" action="{U_ACTION}">
+	<fieldset>
+		<legend>{L_LAXSLASH_FORCESTYLES_CRITERIA_SECTION_TITLE}</legend>
+		<dl>
+			<dt><label for="laxslash_forcestyles_usernames">{L_LAXSLASH_FORCESTYLES_USERNAME_SELECTION_CRITERIA}{L_COLON}</label><br /><span>{L_LAXSLASH_FORCESTYLES_USERNAME_SELECTION_CRITERIA_EXPLAIN}</span></dt>
+			<dd><textarea name="laxslash_forcestyles_usernames" id="laxslash_forcestyles_usernames" rows="5" cols="45"></textarea></dd>
+			<dd style="text-align: left;"><div style="float: {S_CONTENT_FLOW_END};">[ <a href="{U_LAXSLASH_FORCESTYLES_FIND_USERNAME}" onclick="find_username(this.href); return false;">{L_FIND_USERNAME}</a> ]</div><label><input type="checkbox" class="radio" id="anonymous" name="user_id[]" value="{ANONYMOUS_USER_ID}" /> {L_SELECT_ANONYMOUS}</label></dd>
+		</dl>
+		<dl>
+			<dt><label for="laxslash_forcestyles_groups">{L_LAXSLASH_FORCESTYLES_GROUPS_SELECTION_CRITERIA}{L_COLON}</label><br /><span>{L_LAXSLASH_FORCESTYLES_GROUPS_SELECTION_CRITERIA_EXPLAIN}</span></dt>
+			<dd><select name="selected_group_ids[]" id="laxslash_forcestyles_groups" multiple="multiple" size="5">{S_LAXSLASH_FORCESTYLES_GROUP_OPTIONS}</select></dd>
+		</dl>
+		<dl>
+			<dt><label for="laxslash_forcestyles_criteria_styles">{L_LAXSLASH_FORCESTYLES_CURR_STYLE_SELECTION_CRITERIA}{L_COLON}</label><br /><span>{L_LAXSLASH_FORCESTYLES_CURR_STYLE_SELECTION_CRITERIA_EXPLAIN}</span></dt>
+			<dd><select name="selected_style_ids[]" id="laxslash_forcestyles_criteria_styles" multiple="multiple" size="5">{S_LAXSLASH_FORCESTYLES_STYLE_CRITERIA_OPTIONS}</select></dd>
+		</dl>
+	</fieldset>
+
+	<fieldset>
+		<legend>{L_LAXSLASH_FORCESTYLES_STYLE_SELECTION_SECTION_TITLE}</legend>
+		<dl>
+			<dt><label for="laxslash_forcestyles_select_new_style_id">{L_LAXSLASH_FORCESTYLES_SELECT_A_NEW_STYLE}</label><br /><span>{L_LAXSLASH_FORCESTYLES_SELECT_A_NEW_STYLE_EXPLAIN}</span></dt>
+			<dd><select name="laxslash_forcestyles_select_new_style_id" id="laxslash_forcestyles_select_new_style_id" size="1">{S_LAXSLASH_FORCESTYLES_STYLE_CRITERIA_OPTIONS}</select></dd>
+		</dl>
+	</fieldset>
+
+	<fieldset class="submit-buttons">
+		{S_FORM_TOKEN}
+		<input class="button1" type="submit" name="submit" value="{L_SUBMIT}" />
+	</fieldset>
+</form>
+<!-- INCLUDE overall_footer.html -->

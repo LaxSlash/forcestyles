@@ -1,0 +1,9 @@
+services:
+    laxslash.forcestyles.fstyles_acp_sql:
+        class: laxslash\forcestyles\controller\fstyles_acp_sql
+        arguments:
+            - @dbal.conn
+    laxslash.forcestyles.listener:
+        class: laxslash\forcestyles\event\main_listener
+        tags:
+            - { name: event.listener }
