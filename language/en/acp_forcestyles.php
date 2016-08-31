@@ -32,7 +32,7 @@ $lang = array_merge($lang, array(
 	'ACP_LAXSLASH_FORCESTYLES_NON_FOUNDER_FORCED_SUCCESSFULLY_P' => 'Style successfully changed for %d users. Note that Founder users were not altered.',
 	'LAXSLASH_FORCESTYLES_ACP_PANEL_HEADER' => 'Force User Style',
 	'LAXSLASH_FORCESTYLES_ACP_PANEL_DESC' => 'Use this panel to force a style change for users falling under the selected criteria. Note that selecting no criteria will cause all users to be changed. Changes by Non-founder users will not effect Founder users.',
-	'LAXSLASH_FORCESTYLES_WARN_ABOUT_OVERRIDE_STYLES_ON' => 'The board settting "override user style" is enabled. You can still use this panel, but users will not see a theme change until that option is disabled.',
+	'LAXSLASH_FORCESTYLES_WARN_ABOUT_OVERRIDE_STYLES_ON' => 'The board setting "override user style" is enabled. You can still use this panel, but users will not see a theme change until that option is disabled.',
 	'LAXSLASH_FORCESTYLES_CRITERIA_SECTION_TITLE' => 'Criteria Selection',
 	'LAXSLASH_FORCESTYLES_USERNAME_SELECTION_CRITERIA' => 'Select Users by Name',
 	'LAXSLASH_FORCESTYLES_USERNAME_SELECTION_CRITERIA_EXPLAIN' => 'Choose users to change the styles for. One username per line. Non-existant users will be ignored.',
@@ -43,4 +43,5 @@ $lang = array_merge($lang, array(
 	'LAXSLASH_FORCESTYLES_STYLE_SELECTION_SECTION_TITLE' => 'New Style Selection',
 	'LAXSLASH_FORCESTYLES_SELECT_A_NEW_STYLE' => 'Select a Style',
 	'LAXSLASH_FORCESTYLES_SELECT_A_NEW_STYLE_EXPLAIN' => 'Choose the new target style for users matching the criteria above.',
+	'ACL_A_LAXSLASH_FORCESTYLES_FORCE_STYLES' => 'Can force styles',
 ));
