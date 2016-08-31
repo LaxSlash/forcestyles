@@ -3,7 +3,7 @@
 	"type": "phpbb-extension",
 	"description": "Allows an adminsitrator to force themes for a selected user or a group of users. This software is an ALPHA Software - use it at your own risk. Do not use on a Production Website.",
 	"homepage": "",
-	"version": "1.0 ALPHA 1",
+	"version": "0.1 ALPHA 1",
 	"time": "August 30th, 2016 2:03 AM EDT (GMT-4)",
 	"license": "GPL-2.0",
 	"authors": [{
