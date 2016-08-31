@@ -17,11 +17,11 @@ class force_style_info
 		return array(
 			'filename'		=>		'\laxslash\forcestyles\acp\force_style_module',
 			'title'			=>		'ACP_LAXSLASH_FORCESTYLES_MODULE_TITLE',
-			'version'		=>		'1.0 ALPHA 1',
+			'version'		=>		'0.2 ALPHA',
 			'modes'			=>		array(
-				'settings'		=>		array(
+				'force_styles'		=>		array(
 					'title'			=>		'ACP_LAXSLASH_FORCESTYLES_MODULE_TITLE',
-					'auth'			=>		'ext_laxslash/forcestyles',
+					'auth'			=>		'ext_laxslash/forcestyles && acl_a_laxslash_forcestyles_force_styles',
 					'cat'			=>		array('ACP_STYLE_MANAGEMENT'),
 				),
 			),
