@@ -9,6 +9,7 @@ Version 0.2 ALPHA:
  - The admin module mode was renamed from settings to force_styles
  - Fixed major versioning in the ACP Module
  - Fixed indentation for phpbb/phpbb under soft-require in the composer.json file.
+ - Added ACP Logging for Forced Styles
 
 Version 0.1 ALPHA 1:
  - Initial Release
