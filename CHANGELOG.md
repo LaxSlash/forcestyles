@@ -1,5 +1,5 @@
 Version 0.2-PL1 ALPHA:
-- Style changes weren't logging for when crieria-less changes were performed.
+- Style changes weren't logging for when crieria-less changes were performed. Added a special logging entry, just for that.
 
 Version 0.2 ALPHA:
  - Added a CHANGELOG.md file
