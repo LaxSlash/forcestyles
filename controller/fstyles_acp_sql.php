@@ -20,7 +20,7 @@ class fstyles_acp_sql
 	/**
 	 *  Constructor
 	 *
-	 * @param db $db
+	 * @param driver_interface $db
 	 */
 	public function __construct(driver_interface $db)
 	{
@@ -30,7 +30,7 @@ class fstyles_acp_sql
 	/**
 	 * Fetch styles in the database, and return them all in a table.
 	 *
-	 * @return Array An array of all database styles
+	 * @return Array An array of all active and installed database styles
 	 */
 	public function get_styles()
 	{
