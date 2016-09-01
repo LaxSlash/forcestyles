@@ -173,7 +173,7 @@ class force_style_module
 
 					// Well done.
 					// Forced Styles Logging Feature - yeah, we've gotta add this here too, I guess. *facepalm*
-					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LAXSLASH_FORCESTYLES_FORCED_STYLES_ACP_LOG_ENTRY');
+					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LAXSLASH_FORCESTYLES_FORCED_STYLES_ALL_USERS_ACP_LOG_ENTRY');
 
 					$changed_users_count = $db->sql_affectedrows();
 					if ($changed_users_count == 0 || $changed_users_count > 1)
