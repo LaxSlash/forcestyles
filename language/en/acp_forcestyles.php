@@ -44,4 +44,5 @@ $lang = array_merge($lang, array(
 	'LAXSLASH_FORCESTYLES_SELECT_A_NEW_STYLE' => 'Select a Style',
 	'LAXSLASH_FORCESTYLES_SELECT_A_NEW_STYLE_EXPLAIN' => 'Choose the new target style for users matching the criteria above.',
 	'ACL_A_LAXSLASH_FORCESTYLES_FORCE_STYLES' => 'Can force styles',
+	'LAXSLASH_FORCESTYLES_FORCED_STYLES_ACP_LOG_ENTRY' => 'Forced Styles for user(s)',
 ));
