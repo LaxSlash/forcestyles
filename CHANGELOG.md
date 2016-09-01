@@ -1,3 +1,6 @@
+Version 0.2-PL1 ALPHA:
+- Style changes weren't logging for when crieria-less changes were performed.
+
 Version 0.2 ALPHA:
  - Added a CHANGELOG.md file
  - Fixed description typo in composer.json

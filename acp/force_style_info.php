@@ -17,7 +17,7 @@ class force_style_info
 		return array(
 			'filename'		=>		'\laxslash\forcestyles\acp\force_style_module',
 			'title'			=>		'ACP_LAXSLASH_FORCESTYLES_MODULE_TITLE',
-			'version'		=>		'0.2 ALPHA',
+			'version'		=>		'0.2-PL1 ALPHA',
 			'modes'			=>		array(
 				'force_styles'		=>		array(
 					'title'			=>		'ACP_LAXSLASH_FORCESTYLES_MODULE_TITLE',

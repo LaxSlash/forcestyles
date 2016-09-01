@@ -3,8 +3,8 @@
 	"type": "phpbb-extension",
 	"description": "Allows an administrator to force themes for a selected user or a group of users. This extension is an ALPHA extension - use it at your own risk. Do not use on a Production Website.",
 	"homepage": "https://github.com/LaxSlash/forcestyles",
-	"version": "0.2 ALPHA",
-	"time": "September 1st, 2016 3:31 PM EDT (GMT-4)",
+	"version": "0.2-PL1 ALPHA",
+	"time": "September 1st, 2016 3:48 PM EDT (GMT-4)",
 	"license": "GPL-2.0",
 	"authors": [{
 		"name": "lax.slash",
