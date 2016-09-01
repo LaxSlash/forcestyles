@@ -18,7 +18,7 @@ class force_style_module
 
 	public function main($id, $mode)
 	{
-		global $user, $template, $request, $config, $phpbb_container, $phpbb_root_path, $phpEx, $db;
+		global $user, $template, $request, $config, $phpbb_container, $phpbb_root_path, $phpEx, $db, $phpbb_log;
 
 		$fstyles_acp_sql = $phpbb_container->get('laxslash.forcestyles.fstyles_acp_sql');
 
@@ -250,6 +250,10 @@ class force_style_module
 
 				// Well done.
 				$changed_users_count = $db->sql_affectedrows();
+
+				// Forced Styles Logging Feature
+				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LAXSLASH_FORCESTYLES_FORCED_STYLES_ACP_LOG_ENTRY');
+
 				if ($changed_users_count == 0 || $changed_users_count > 1)
 				{
 					if ($user->data['user_type'] == USER_FOUNDER)
