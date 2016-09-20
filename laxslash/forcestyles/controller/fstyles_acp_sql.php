@@ -51,7 +51,7 @@ class fstyles_acp_sql
 	 */
 	public function get_groups()
 	{
-		$sql = 'SELECT group_id, group_name, group_founder_manage
+		$sql = 'SELECT group_id, group_name, group_founder_manage, group_type
 				FROM ' . GROUPS_TABLE;
 		$result = $this->db->sql_query($sql);
 		$rowset = $this->db->sql_fetchrowset($result);
@@ -60,3 +60,5 @@ class fstyles_acp_sql
 		return $rowset;
 	}
 }
+
+
