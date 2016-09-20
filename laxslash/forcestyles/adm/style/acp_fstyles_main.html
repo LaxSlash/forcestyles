@@ -26,7 +26,7 @@
 		<dl>
 			<dt><label for="laxslash_forcestyles_usernames">{L_LAXSLASH_FORCESTYLES_USERNAME_SELECTION_CRITERIA}{L_COLON}</label><br /><span>{L_LAXSLASH_FORCESTYLES_USERNAME_SELECTION_CRITERIA_EXPLAIN}</span></dt>
 			<dd><textarea name="laxslash_forcestyles_usernames" id="laxslash_forcestyles_usernames" rows="5" cols="45"></textarea></dd>
-			<dd style="text-align: left;"><div style="float: {S_CONTENT_FLOW_END};">[ <a href="{U_LAXSLASH_FORCESTYLES_FIND_USERNAME}" onclick="find_username(this.href); return false;">{L_FIND_USERNAME}</a> ]</div><label><input type="checkbox" class="radio" id="anonymous" name="user_id[]" value="{ANONYMOUS_USER_ID}" /> {L_SELECT_ANONYMOUS}</label></dd>
+			<dd style="text-align: left;"><div style="float: {S_CONTENT_FLOW_END};">[ <a href="{U_LAXSLASH_FORCESTYLES_FIND_USERNAME}" onclick="find_username(this.href); return false;">{L_FIND_USERNAME}</a> ]</div><label><input type="checkbox" class="radio" id="anonymous" name="laxslash_forcestyles_select_anonymous_user_id" value="{ANONYMOUS_USER_ID}" /> {L_SELECT_ANONYMOUS}</label></dd>
 		</dl>
 		<dl>
 			<dt><label for="laxslash_forcestyles_groups">{L_LAXSLASH_FORCESTYLES_GROUPS_SELECTION_CRITERIA}{L_COLON}</label><br /><span>{L_LAXSLASH_FORCESTYLES_GROUPS_SELECTION_CRITERIA_EXPLAIN}</span></dt>
@@ -48,6 +48,7 @@
 
 	<fieldset class="submit-buttons">
 		{S_FORM_TOKEN}
+		<label><input type="checkbox" name="laxslash_forcestyles_send_notification" id="laxslash_forcestyles_send_notification" /> {L_ACP_LAXSLASH_FORCESTYLES_SEND_NOTIFICATION}</label><br /><br />
 		<input class="button1" type="submit" name="submit" value="{L_SUBMIT}" />
 	</fieldset>
 </form>
