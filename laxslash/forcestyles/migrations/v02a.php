@@ -59,3 +59,4 @@ class v02a extends migration
 		);
 	}
 }
+

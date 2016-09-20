@@ -52,3 +52,5 @@ class v01a1 extends migration
 		);
 	}
 }
+
+
