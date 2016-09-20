@@ -21,7 +21,8 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.user_setup' => 'load_language_on_setup'
+			'core.user_setup' => 'load_language_on_setup',
+			'core.permissions' => 'add_permissions',
 		);
 	}
 
@@ -34,4 +35,16 @@ class main_listener implements EventSubscriberInterface
 		);
 		$event['lang_set_ext'] = $lang_set_ext;
 	}
+
+	public function add_permissions($event)
+	{
+		$permissions = $event['permissions'];
+		$permissions['a_laxslash_forcestyles_force_styles'] = array(
+			'lang' => 'ACL_A_LAXSLASH_FORCESTYLES_FORCE_STYLES',
+			'cat' => 'misc',
+		);
+		$event['permissions'] = $permissions;
+		unset($permissions);
+	}
 }
+
