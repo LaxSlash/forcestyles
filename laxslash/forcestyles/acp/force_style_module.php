@@ -39,11 +39,11 @@ class force_style_module
 			trigger_error('ACP_LAXSLASH_FORCESTYLES_NOT_ENOUGH_STYLES_TO_USE', E_USER_WARNING);
 		}
 
+		// Make an errors checking array here.
+		$errors = array();
+
 		if ($request->is_set_post('submit'))
 		{
-			// Make an errors checking array here.
-			$errors = array();
-
 			if (!check_form_key('laxslash/forcestyles'))
 			{
 				// Invalid form key, error!
@@ -51,10 +51,11 @@ class force_style_module
 				$errors[] = 'FORM_INVALID';
 			}
 
-			// Make an array of just style IDs.
+			// Make an array of just style IDs, and an array containing their names with the ID as the key value.
 			foreach ($styles_coll as $working_style)
 			{
 				$style_ids_coll[] = $working_style['style_id'];
+				$style_names[$working_style['style_id']] = $working_style['style_name'];
 			}
 			unset($working_style);
 
@@ -69,11 +70,32 @@ class force_style_module
 			$groups_selected = $request->variable('selected_group_ids', array(0));
 			$styles_selected = $request->variable('selected_style_ids', array(0));
 			$new_style_id = $request->variable('laxslash_forcestyles_select_new_style_id', '');
+			$send_notification = $request->variable('laxslash_forcestyles_send_notification', false);
+			$select_anonymous = $request->variable('laxslash_forcestyles_select_anonymous_user_id', false);
 
 			// Convert $users_text into an array of Usernames
+
+			$usernames = array();
+			$selected_usernames = array();
+
+			// Add the Anonymous username to the text if selected.
+			if ($select_anonymous)
+			{
+				$sql = 'SELECT username
+						FROM ' . USERS_TABLE . '
+						WHERE user_id = ' . ANONYMOUS;
+				$result = $db->sql_query($sql);
+				$row = $db->sql_fetchrow($result);
+				$db->sql_freeresult($result);
+				$users_text .= "\n" . $row['username'];
+				unset($row);
+			}
+
 			if ($users_text != '')
 			{
 				$usernames = explode("\n", $users_text);
+				$usernames = array_unique($usernames);
+				$selected_usernames = $usernames; // For logging purposes later on.
 			}
 			unset($users_text);
 
@@ -89,7 +111,7 @@ class force_style_module
 
 			// Perform the checks here.
 			// If a style is not in the styles_coll array, but it is in the criteria array, stop the process and warn the user.
-			if (isset($styles_selected))
+			if (!empty($styles_selected))
 			{
 				foreach ($styles_selected as $working_style)
 				{
@@ -101,42 +123,39 @@ class force_style_module
 				}
 			}
 
-			if (isset($groups_selected))
+			if (!empty($groups_selected))
 			{
 				$groups_coll = $fstyles_acp_sql->get_groups();
+				$affected_groups = array();
 				foreach ($groups_coll as $working_group)
 				{
 					$group_chks_coll[$working_group['group_id']]['group_founder_manage'] = $working_group['group_founder_manage'];
-					$group_chks_coll[$working_group['group_id']]['group_name'] = $working_group['group_name'];
+					$group_names_coll[$working_group['group_id']] = ($working_group['group_type'] == GROUP_SPECIAL) ? $user->lang('G_' . $working_group['group_name']) : $working_group['group_name'];
 					$group_ids_coll[] = $working_group['group_id'];
 				}
 				unset($groups_coll);
 
+				$i = (int) 0;
 				foreach ($groups_selected as $working_group)
 				{
 					// Make sure that we're not trying to work with any founder managed groups here, if the user's not a founder.
-					if ($user->data['user_type'] != USER_FOUNDER)
+					if ($user->data['user_type'] != USER_FOUNDER && $group_chks_coll[$working_group]['group_founder_manage'])
 					{
-						if ($group_chks_coll[$working_group['group_id']]['group_founder_manage'] == true)
-						{
-							// Sorry, but no.
-							$errors[] = $user->lang('ACP_LAXSLASH_FORCESTYLES_FOUNDER_GROUP_SELECTED_BY_NON_FOUNDER_USER', $group_checks_coll[$working_group['group_id']][group_name]);
-						}
-					}
-
-					// Do all of these groups actually exist?
-					if (!in_array($working_group, $group_ids_coll))
-					{
+						// Sorry, but no.
+						$errors[] = $user->lang('ACP_LAXSLASH_FORCESTYLES_FOUNDER_GROUP_SELECTED_BY_NON_FOUNDER_USER', $group_checks_coll[$working_group][group_name]);
+					} elseif (!in_array($working_group, $group_ids_coll)) {     // Do all of these groups actually exist?
 						// Hello, what's this? A non-existant group? Only put this error in for the first one not found.
 						$i++;
 						if ($i == 1)
 						{
 							$errors[] = 'ACP_LAXSLASH_FORCESTYLES_NON_EXISTANT_GROUP_OR_GROUPS_SELECTED';
 						}
+					} else {
+						// Add the selected group into the $affected_groups array().
+						$affected_groups[] = $group_names_coll[$working_group];
 					}
 				}
 				unset($group_ids_coll);
-				unset($group_chks_coll);
 			}
 
 			// Make sure that the NEW Style ID is in the style_ids_coll list.
@@ -151,127 +170,150 @@ class force_style_module
 			{
 				// All checks passed.
 				// Unset unneeded arrays here now.
-				unset($styles_coll);
-				unset($errors);
 
-				// Base SQL Statement starts here.
-				$sql_arr = array(
-					'user_style' => $new_style_id,
-				);
+				// And make the newly needed arrays here now.
+				$affected_ids = array();
+				$affected_usernames_pre = array();
+				$affected_usernames = array();
 
-				$sql = 'UPDATE ' . USERS_TABLE . '
-						SET ' . $db->sql_build_array('UPDATE', $sql_arr);
-				$sql .= ($user->data['user_type'] != USER_FOUNDER) ? ' WHERE user_type != ' . USER_FOUNDER . ' AND user_style != ' . $new_style_id : 'WHERE user_style != ' . $new_style_id;
+				// Get all affected User IDs here.
+				$sql_user_ids_where = 'user_style != ' . $new_style_id;
 
-				if (!isset($usernames) && !isset($groups_selected) && !isset($styles_selected))
+				// Check for founder status
+				$sql_user_ids_where .= ($user->data['user_type'] != USER_FOUNDER) ? ' AND user_type != ' . USER_FOUNDER : '';
+
+				if (!empty($groups_selected) || !empty($usernames) || !empty($styles_selected))
 				{
-					// No criteria was set by the user. This makes our life easy, just go ahead and apply the changes to all users. Check for founders and founder status, too. (Done already)
-					$db->sql_query($sql);
+					$sql_user_ids_where .= ' AND (';
 
-					// Unset things now.
-
-
-					// Well done.
-					// Forced Styles Logging Feature - yeah, we've gotta add this here too, I guess. *facepalm*
-					$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LAXSLASH_FORCESTYLES_FORCED_STYLES_ALL_USERS_ACP_LOG_ENTRY');
-
-					$changed_users_count = $db->sql_affectedrows();
-					if ($changed_users_count == 0 || $changed_users_count > 1)
+					// Get users in each selected usergroup here.
+					if (!empty($groups_selected))
 					{
-						if ($user->data['user_type'] == USER_FOUNDER)
-						{
-							trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_FORCED_SUCCESSFULLY_P', $changed_users_count) . adm_back_link($this->u_action));
-						} else {
-							trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_NON_FOUNDER_FORCED_SUCCESSFULLY_P', $changed_users_count) . adm_back_link($this->u_action));
-						}
-					} else {
-						if ($user->data['user_type'] == USER_FOUNDER)
-						{
-							trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_FORCED_SUCCESSFULLY_S', $changed_users_count) . adm_back_link($this->u_action));
-						} else {
-							trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_NON_FOUNDER_FORCED_SUCCESSFULLY_S', $changed_users_count) . adm_back_link($this->u_action));
-						}
-					}
-				}
-
-				if (isset($usernames) || isset($groups_selected))
-				{
-					// Setup the new final array here.
-					$usernames_final_selected = array();
-
-					if (isset($usernames))
-					{
-						// Add the usernames to the selections criteria.
-						$usernames_final_selected = $usernames;
-					}
-
-					if (isset($groups_selected))
-					{
-						// Add the user groups to the selection criteria.
-
-						// Step 1: Get all users in the selected groups.
-						if (!function_exists(group_memberships))
+						if (!function_exists('group_memberships'))
 						{
 							require($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 						}
 
-						$group_selected_users_pre = group_memberships($groups_selected);
-						foreach ($group_selected_users_pre as $working_user)
+						$group_members = group_memberships($groups_selected);
+
+						foreach ($group_members as $current_member)
 						{
-							$group_selected_users[] = $working_user['username'];
+							$usernames[] = $current_member['username'];
 						}
 
-						// Step 2: If users within these groups are NOT in the $usernames array, subtract them out.
-						if (isset($usernames))
+						unset($group_members);
+						unset($groups_selected);
+					}
+
+					// Get usernames. Group members/users will already be included in the array.
+					$sql_user_ids_where .= (!empty($usernames)) ? ' ' . $db->sql_in_set('username', $usernames) : '';
+
+					// Get style users.
+					$sql_user_ids_where .= (!empty($styles_selected) && !empty($usernames)) ? ' OR ' . $db->sql_in_set('user_style', $styles_selected) : (!empty($styles_selected)) ? ' ' . $db->sql_in_set('user_style', $styles_selected) : '';
+
+					$sql_user_ids_where .= ')';
+
+					// Set an array of the affected styles and style names.
+					if (!empty($styles_selected))
+					{
+						foreach ($styles_selected as $current_style)
 						{
-							// Overwrite the array?)
-							$usernames_final_selected = array_intersect($usernames, $group_selected_users);
-							unset($usernames);
-						} else {
-							$usernames_final_selected = $group_selected_users;
+							if (isset($style_names[$current_style]))
+							{
+								// Failsafe.
+								$affected_styles[] = $style_names[$current_style];
+							}
+
+							unset($current_style);
 						}
-						unset($group_selected_users);
-					} else {
-						unset($usernames);
 					}
-
-					// Add it to the query here.
-					$sql .= ' AND ' . $db->sql_in_set('username', $usernames_final_selected);
 				}
 
-				if (isset($styles_selected))
+				$sql = 'SELECT user_id, username
+						FROM ' . USERS_TABLE . '
+						WHERE ' . $sql_user_ids_where . '
+						ORDER BY username ASC';
+				$result = $db->sql_query($sql);
+				while ($row = $db->sql_fetchrow($result))
 				{
-					// Add the current styles to the selections criteria.
-					$sql .= ' AND ' . $db->sql_in_set('user_style', $styles_selected);
+					$affected_ids[] = (int) $row['user_id'];
+					$affected_usernames_pre[] = $row['username'];
+
+					unset($row);
 				}
+				$db->sql_freeresult($sql);
 
-				// Cleared for takeoff.
-				$db->sql_query($sql);
+				// array_intersect here for the right/needed usernames:
+				$affected_usernames = array_intersect($affected_usernames_pre, $selected_usernames);
+				unset($affected_usernames_pre);
 
-				// Unset things now.
-
-
-				// Well done.
-				$changed_users_count = $db->sql_affectedrows();
-
-				// Forced Styles Logging Feature
-				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LAXSLASH_FORCESTYLES_FORCED_STYLES_ACP_LOG_ENTRY');
-
-				if ($changed_users_count == 0 || $changed_users_count > 1)
+				// Now, update the table with the selected users?
+				if (!empty($affected_ids))
 				{
+					// Make the affected_ids array to be unique
+					$affecte_ids = array_unique($affected_ids);
+					$sql = 'UPDATE ' . USERS_TABLE . '
+							SET user_style = ' . $new_style_id . '
+							WHERE ' . $db->sql_in_set('user_id', $affected_ids);
+					$db->sql_query($sql);
+
+					// Get effected users count here.
+					$changed_users = $db->sql_affectedrows();
+
+					// Send the notification here if we need to.
+					if ($send_notification)
+					{
+						$notification_manager = $phpbb_container->get('notification_manager'); // Load the notifications manager here.
+
+						$config->increment('laxslash_forcestyles_notification_id', 1);
+
+						$notify_data = array(
+							'new_style_id' => $new_style_id,
+							'notify_users_ary' => $affected_ids,
+							'laxslash_forcestyles_notification_id' => $config['laxslash_forcestyles_notification_id'],
+						);
+
+						$notification_manager->add_notifications(array(
+							'laxslash.forcestyles.notification.type.change_style',
+						), $notify_data);
+
+						unset($notify_data);
+					}
+					// Unset things now.
+					unset($affected_ids);
+					unset($group_chks_coll);
+
+					// Forced Styles Logging Feature
+					$selection_criteria_used_for_log = '';
+					$new_style_name = $style_names[$new_style_id];
+
+					if (!empty($affected_usernames) || !empty($affected_groups) || !empty($affected_styles))
+					{
+						$selection_criteria_used_for_log .= $user->lang('LAXSLASH_FORCESTYLES_LOG_ENTRY_CRITERIA_SPECIFIED_PRE');
+						$selection_criteria_used_for_log .= (!empty($affected_usernames)) ? $user->lang('LAXSLASH_FORCESTYLES_LOG_ENTRY_USERNAMES', implode(', ', $affected_usernames)) : '';
+						$selection_criteria_used_for_log .= (!empty($affected_groups)) ? $user->lang('LAXSLASH_FORCESTYLES_LOG_ENTRY_GROUPS', implode(', ', $affected_groups)) : '';
+						$selection_criteria_used_for_log .= (!empty($affected_styles)) ? $user->lang('LAXSLASH_FORCESTYLES_LOG_ENTRY_STYLES', implode(', ', $affected_styles)) : '';
+					} else {
+						$selection_criteria_used_for_log = $user->lang('LAXSLASH_FORCESTYLES_LOG_ENTRY_NO_CRITERIA_SPECIFIED');
+					}
+					$selection_criteria_used_for_log .= ($send_notification) ? $user->lang('LAXSLASH_FORCESTYLES_LOG_ENTRY_NOTIFICATION_SENT') : '';
+
+					if ($user->data['user_type'] != USER_FOUNDER)
+					{
+						$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LAXSLASH_FORCESTYLES_ACP_NON_FOUNDER_LOG_ENTRY', time(), array($new_style_name, $selection_criteria_used_for_log));
+					} else {
+						$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LAXSLASH_FORCESTYLES_ACP_LOG_ENTRY', time(), array($new_style_name, $selection_criteria_used_for_log));
+					}
+
+					// Well done.
 					if ($user->data['user_type'] == USER_FOUNDER)
 					{
-						trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_FORCED_SUCCESSFULLY_P', $changed_users_count) . adm_back_link($this->u_action));
+						trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_FORCED_SUCCESSFULLY', $changed_users) . adm_back_link($this->u_action));
 					} else {
-						trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_NON_FOUNDER_FORCED_SUCCESSFULLY_P', $changed_users_count) . adm_back_link($this->u_action));
+						trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_NON_FOUNDER_FORCED_SUCCESSFULLY', $changed_users) . adm_back_link($this->u_action));
 					}
-				} else {
-					if ($user->data['user_type'] == USER_FOUNDER)
-					{
-						trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_FORCED_SUCCESSFULLY_S', $changed_users_count) . adm_back_link($this->u_action));
-					} else {
-						trigger_error($user->lang('ACP_LAXSLASH_FORCESTYLES_NON_FOUNDER_FORCED_SUCCESSFULLY_S', $changed_users_count) . adm_back_link($this->u_action));
-					}
+				}  else {
+					$errors[] = $user->lang('ACP_LAXSLASH_FORCESTYLES_NO_APPLICABLE_USERS_FOUND');
 				}
 			}
 		}
@@ -281,6 +323,7 @@ class force_style_module
 		// The first section should contain the criteria of which users to apply the changes to.
 		// Usernames, groups and current theme are the three possible criteria.
 		// The second section should provide a listing of all the themes installed on the boards.
+		$criteria_styles = ''; // Define a string variable here to prevent a PHP Notice.
 		foreach ($styles_coll as $current_style)
 		{
 			// We can only force active styles here.
@@ -306,6 +349,7 @@ class force_style_module
 			'S_ERRORS' => (sizeof($errors)) ? true : false,
 			'ERRORS_OUTPUT' => (sizeof($errors)) ? implode('<br />', $errors) : '',
 			'S_ERROR_BOX_NEEDED' => (sizeof($errors) || $config['override_user_style']) ? true : false,
+			'ANONYMOUS_USER_ID' => ANONYMOUS,
 		));
 
 		unset($errors);
