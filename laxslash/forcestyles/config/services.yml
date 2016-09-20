@@ -7,3 +7,20 @@ services:
         class: laxslash\forcestyles\event\main_listener
         tags:
             - { name: event.listener }
+    laxslash.forcestyles.notification.type.change_style:
+        scope: prototype
+        class: laxslash\forcestyles\notification\change_style
+        tags:
+            - { name: notification.type }
+        arguments:
+            - @user_loader
+            - @dbal.conn
+            - @cache.driver
+            - @user
+            - @auth
+            - @config
+            - %tables.notification_types%
+            - %tables.notifications%
+            - %tables.user_notifications%
+            - %core.root_path%
+            - %core.php_ext%
